@@ -3,7 +3,7 @@ const Card = require('../models/card');
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.status(200).send({ data: cards }))
-    .catch((error) => res.status(500).send({ message: error.message }));
+    .catch(() => res.status(500).send({ message: 'ERROR :: Упс, у нас тут непредвиденная ошибка! Status(500)' }));
 };
 
 module.exports.createCard = (req, res) => {
@@ -12,15 +12,30 @@ module.exports.createCard = (req, res) => {
 
   Card.create({ name, link, owner: userId })
     .then((card) => res.status(200).send({ data: card }))
-    .catch((error) => res.status(500).send({ message: error.message }));
+    .catch((error) => {
+      if (error.name === 'ValidationError') {
+        return res.status(400).send({ message: 'ERROR :: Переданы некорректные данные в методы создания карточки! Status(400)' });
+      }
+      return res.status(500).send({ message: 'ERROR :: Упс, у нас тут непредвиденная ошибка! Status(500)' });
+    });
 };
 
 module.exports.deleteCard = (req, res) => {
   const id = req.params.cardId;
 
-  Card.deleteOne({ _id: id })
-    .then((cards) => res.status(200).send({ data: cards }))
-    .catch((error) => res.status(500).send({ message: error.message }));
+  Card.findByIdAndDelete(id)
+    .then((card) => {
+      if (card === null) {
+        return res.status(404).send({ message: 'ERROR :: Удаление карточки с несуществующим в БД id! Status(404)' });
+      }
+      return res.status(200).send({ data: card });
+    })
+    .catch((error) => {
+      if (error.name === 'CastError') {
+        return res.status(400).send({ message: 'ERROR :: Удаление карточки с некорректным id! Status(400)' });
+      }
+      return res.status(500).send({ message: 'ERROR :: Упс, у нас тут непредвиденная ошибка! Status(500)' });
+    });
 };
 
 module.exports.likeCard = (req, res) => {
