@@ -14,7 +14,7 @@ module.exports.getUserById = (req, res) => {
       if (user === null) {
         return res.status(404).send({ message: 'ERROR :: Получение пользователя с несуществующим в БД id! Status(404)' });
       }
-      return res.send({ data: { user } });
+      return res.send({ data: user });
     })
     .catch((error) => {
       if (error.name === 'CastError') {
