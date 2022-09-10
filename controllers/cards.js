@@ -42,22 +42,42 @@ module.exports.likeCard = (req, res) => {
   const id = req.params.cardId;
 
   Card.findByIdAndUpdate(
-    { _id: id },
+    id,
     { $addToSet: { likes: req.user._id } },
-    { new: true },
+    { returnDocument: 'after', new: true, runValidators: true },
   )
-    .then((card) => res.status(200).send({ data: card }))
-    .catch((error) => res.status(500).send({ message: error.message }));
+    .then((card) => {
+      if (card === null) {
+        return res.status(404).send({ message: 'ERROR :: Добавление лайка у карточки с несуществующим в БД id! Status(404)' });
+      }
+      return res.status(200).send({ data: card });
+    })
+    .catch((error) => {
+      if (error.name === 'CastError') {
+        return res.status(400).send({ message: 'ERROR :: Добавление лайка у карточки с некорректным id! Status(400)' });
+      }
+      return res.status(500).send({ message: 'ERROR :: Упс, у нас тут непредвиденная ошибка! Status(500)' });
+    });
 };
 
 module.exports.dislikeCard = (req, res) => {
   const id = req.params.cardId;
 
   Card.findByIdAndUpdate(
-    { _id: id },
+    id,
     { $pull: { likes: req.user._id } },
-    { new: true },
+    { returnDocument: 'after', new: true, runValidators: true },
   )
-    .then((card) => res.status(200).send({ data: card }))
-    .catch((error) => res.status(500).send({ message: error.message }));
+    .then((card) => {
+      if (card === null) {
+        return res.status(404).send({ message: 'ERROR :: Удаление лайка у карточки с несуществующим в БД id! Status(404)' });
+      }
+      return res.status(200).send({ data: card });
+    })
+    .catch((error) => {
+      if (error.name === 'CastError') {
+        return res.status(400).send({ message: 'ERROR :: Удаление лайка у карточки с некорректным id! Status(400)' });
+      }
+      return res.status(500).send({ message: 'ERROR :: Упс, у нас тут непредвиденная ошибка! Status(500)' });
+    });
 };
