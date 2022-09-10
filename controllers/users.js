@@ -9,11 +9,16 @@ module.exports.getUsers = (req, res) => {
 module.exports.getUserById = (req, res) => {
   const id = req.params.userId;
 
-  User.findById({ _id: id })
-    .then((user) => res.send({ data: { user } }))
+  User.findById(id)
+    .then((user) => {
+      if (user === null) {
+        return res.status(404).send({ message: 'ERROR :: Получение пользователя с несуществующим в БД id! Status(404)' });
+      }
+      return res.send({ data: { user } });
+    })
     .catch((error) => {
       if (error.name === 'CastError') {
-        return res.status(400).send({ message: 'ERROR :: Пользователь не найден! Status(400)' });
+        return res.status(400).send({ message: 'ERROR :: Получение пользователя с некорректным id! Status(400)' });
       }
       return res.status(500).send({ message: 'ERROR :: Упс, у нас тут непредвиденная ошибка! Status(500)' });
     });
