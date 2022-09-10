@@ -3,9 +3,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 
-const { PORT = 3000, DB_CONN } = process.env;
+const { PORT = 3000 } = process.env;
 const app = express();
-// id "631c31297da1e10941dbacd7"
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -17,7 +16,7 @@ app.use((req, res, next) => {
   next();
 });
 
-mongoose.connect(DB_CONN, {
+mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
 });
 
