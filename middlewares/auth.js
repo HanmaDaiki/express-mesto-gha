@@ -2,18 +2,13 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken');
 
 const { JWT_SECRET } = process.env;
-
-const handleAuthError = (res) => {
-  res
-    .status(401)
-    .send({ message: 'Необходима авторизация' });
-};
+const AuthorizationErr = require('../errors/AuthorizationErr');
 
 module.exports = (req, res, next) => {
   const token = req.cookies.jwt;
 
   if (!token) {
-    handleAuthError(res);
+    throw new AuthorizationErr('Неправильные почта или пароль');
   }
 
   let payload;
@@ -21,7 +16,7 @@ module.exports = (req, res, next) => {
   try {
     payload = jwt.verify(token, JWT_SECRET);
   } catch (err) {
-    return handleAuthError(res);
+    throw new AuthorizationErr('Неправильные почта или пароль');
   }
 
   req.user = payload;
