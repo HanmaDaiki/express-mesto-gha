@@ -86,8 +86,7 @@ module.exports.getUserById = (req, res, next) => {
       if (error.name === 'CastError') {
         throw new CastErr('Некорректный id для получения пользователя!');
       }
-    })
-    .catch((error) => {
+
       next(error);
     });
 };
