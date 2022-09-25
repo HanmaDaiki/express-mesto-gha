@@ -28,16 +28,14 @@ module.exports.createCard = (req, res, next) => {
 
 module.exports.deleteCard = (req, res, next) => {
   const id = req.params.cardId;
-  const currentUserId = req.user._id;
 
   Card.findByIdAndDelete(id)
     .then((card) => {
       if (card === null) {
         throw new NotFoundErr('Карточка не существует!');
       }
-
-      if (currentUserId !== card.owner.toSring()) {
-        throw new AccessErr('Ошибка доступа к удалению!');
+      if (card.owner.toString() !== req.user._id) {
+        throw new AccessErr('Ошибка доступа к карточке');
       }
 
       return res.status(200).send({ data: card });
