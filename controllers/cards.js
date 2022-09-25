@@ -2,6 +2,7 @@ const Card = require('../models/card');
 const ValidationErr = require('../errors/ValidationErr');
 const NotFoundErr = require('../errors/NotFoundErr');
 const CastErr = require('../errors/CastErr');
+const AccessErr = require('../errors/AccessErr');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
@@ -27,11 +28,16 @@ module.exports.createCard = (req, res, next) => {
 
 module.exports.deleteCard = (req, res, next) => {
   const id = req.params.cardId;
+  const currentUserId = req.user._id;
 
   Card.findByIdAndDelete(id)
     .then((card) => {
       if (card === null) {
         throw new NotFoundErr('Карточка не существует!');
+      }
+
+      if (currentUserId !== card.owner.toSring()) {
+        throw new AccessErr('Ошибка доступа к удалению!');
       }
 
       return res.status(200).send({ data: card });
