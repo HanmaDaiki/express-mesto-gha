@@ -1,12 +1,16 @@
 const Card = require('../models/card');
+const ValidationErr = require('../errors/ValidationErr');
+const NotFoundErr = require('../errors/NotFoundErr');
+const CastErr = require('../errors/CastErr');
+const AccessErr = require('../errors/AccessErr');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.status(200).send({ data: cards }))
-    .catch(() => res.status(500).send({ message: 'ERROR :: Упс, у нас тут непредвиденная ошибка! Status(500)' }));
+    .catch((error) => next(error));
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const userId = req.user._id;
   const { name, link } = req.body;
 
@@ -14,31 +18,37 @@ module.exports.createCard = (req, res) => {
     .then((card) => res.status(200).send({ data: card }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
-        return res.status(400).send({ message: 'ERROR :: Переданы некорректные данные в методы создания карточки! Status(400)' });
+        throw new ValidationErr('Некорректные данные!');
       }
-      return res.status(500).send({ message: 'ERROR :: Упс, у нас тут непредвиденная ошибка! Status(500)' });
+    })
+    .catch((error) => {
+      next(error);
     });
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   const id = req.params.cardId;
 
   Card.findByIdAndDelete(id)
     .then((card) => {
       if (card === null) {
-        return res.status(404).send({ message: 'ERROR :: Удаление карточки с несуществующим в БД id! Status(404)' });
+        throw new NotFoundErr('Карточка не существует!');
       }
+      if (card.owner.toString() !== req.user._id) {
+        throw new AccessErr('Ошибка доступа к карточке');
+      }
+
       return res.status(200).send({ data: card });
     })
     .catch((error) => {
       if (error.name === 'CastError') {
-        return res.status(400).send({ message: 'ERROR :: Удаление карточки с некорректным id! Status(400)' });
+        throw new CastErr('Некорректные данные карточки!');
       }
-      return res.status(500).send({ message: 'ERROR :: Упс, у нас тут непредвиденная ошибка! Status(500)' });
+      next(error);
     });
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   const id = req.params.cardId;
 
   Card.findByIdAndUpdate(
@@ -48,19 +58,20 @@ module.exports.likeCard = (req, res) => {
   )
     .then((card) => {
       if (card === null) {
-        return res.status(404).send({ message: 'ERROR :: Добавление лайка у карточки с несуществующим в БД id! Status(404)' });
+        throw new NotFoundErr('Добавление лайка несуществующей карточки!');
       }
+
       return res.status(200).send({ data: card });
     })
     .catch((error) => {
       if (error.name === 'CastError') {
-        return res.status(400).send({ message: 'ERROR :: Добавление лайка у карточки с некорректным id! Status(400)' });
+        throw new CastErr('Добавление лайка с некорректным id для карточки!');
       }
-      return res.status(500).send({ message: 'ERROR :: Упс, у нас тут непредвиденная ошибка! Status(500)' });
+      next(error);
     });
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   const id = req.params.cardId;
 
   Card.findByIdAndUpdate(
@@ -70,14 +81,15 @@ module.exports.dislikeCard = (req, res) => {
   )
     .then((card) => {
       if (card === null) {
-        return res.status(404).send({ message: 'ERROR :: Удаление лайка у карточки с несуществующим в БД id! Status(404)' });
+        throw new NotFoundErr('Добавление лайка несуществующей карточки!');
       }
+
       return res.status(200).send({ data: card });
     })
     .catch((error) => {
       if (error.name === 'CastError') {
-        return res.status(400).send({ message: 'ERROR :: Удаление лайка у карточки с некорректным id! Status(400)' });
+        throw new CastErr('Удаления лайка с некорректным id для карточки');
       }
-      return res.status(500).send({ message: 'ERROR :: Упс, у нас тут непредвиденная ошибка! Status(500)' });
+      next(error);
     });
 };
