@@ -65,8 +65,6 @@ module.exports.likeCard = (req, res, next) => {
       if (error.name === 'CastError') {
         throw new CastErr('Добавление лайка с некорректным id для карточки!');
       }
-    })
-    .catch((error) => {
       next(error);
     });
 };
@@ -90,8 +88,6 @@ module.exports.dislikeCard = (req, res, next) => {
       if (error.name === 'CastError') {
         throw new CastErr('Удаления лайка с некорректным id для карточки');
       }
-    })
-    .catch((error) => {
       next(error);
     });
 };
