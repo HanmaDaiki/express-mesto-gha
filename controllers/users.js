@@ -5,9 +5,10 @@ const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = process.env;
 
 const User = require('../models/user');
-const { ValidationErr } = require('../errors/ValidationErr');
-const { NotFoundErr } = require('../errors/NotFoundErr');
-const { CastErr } = require('../errors/CastErr');
+const ValidationErr = require('../errors/ValidationErr');
+const NotFoundErr = require('../errors/NotFoundErr');
+const CastErr = require('../errors/CastErr');
+const ReapeatEmailErr = require('../errors/ReapeatEmailErr');
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
@@ -31,7 +32,6 @@ module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-
   bcrypt.hash(password, 10)
     .then((hash) => {
       User.create({
@@ -48,6 +48,11 @@ module.exports.createUser = (req, res, next) => {
             throw new ValidationErr('Некорректные данные для создания пользователя!');
           }
 
+          if (error.code === 11000) {
+            throw new ReapeatEmailErr('Почтовый адрес уже занят!');
+          }
+        })
+        .catch((error) => {
           next(error);
         });
     });
@@ -73,7 +78,8 @@ module.exports.getUserById = (req, res, next) => {
       if (error.name === 'CastError') {
         throw new CastErr('Некорректный id для получения пользователя!');
       }
-
+    })
+    .catch((error) => {
       next(error);
     });
 };
@@ -97,7 +103,8 @@ module.exports.updateUserInfo = (req, res, next) => {
       if (error.name === 'CastError') {
         throw new NotFoundErr('Пользователь не найден!');
       }
-
+    })
+    .catch((error) => {
       next(error);
     });
 };

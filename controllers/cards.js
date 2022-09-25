@@ -1,7 +1,7 @@
 const Card = require('../models/card');
-const { ValidationErr } = require('../errors/ValidationErr');
-const { NotFoundErr } = require('../errors/NotFoundErr');
-const { CastErr } = require('../errors/CastErr');
+const ValidationErr = require('../errors/ValidationErr');
+const NotFoundErr = require('../errors/NotFoundErr');
+const CastErr = require('../errors/CastErr');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
@@ -19,7 +19,8 @@ module.exports.createCard = (req, res, next) => {
       if (error.name === 'ValidationError') {
         throw new ValidationErr('Некорректные данные!');
       }
-
+    })
+    .catch((error) => {
       next(error);
     });
 };
@@ -39,7 +40,8 @@ module.exports.deleteCard = (req, res, next) => {
       if (error.name === 'CastError') {
         throw new CastErr('Некорректные данные карточки!');
       }
-
+    })
+    .catch((error) => {
       next(error);
     });
 };
@@ -63,7 +65,8 @@ module.exports.likeCard = (req, res, next) => {
       if (error.name === 'CastError') {
         throw new CastErr('Добавление лайка с некорректным id для карточки!');
       }
-
+    })
+    .catch((error) => {
       next(error);
     });
 };
@@ -87,7 +90,8 @@ module.exports.dislikeCard = (req, res, next) => {
       if (error.name === 'CastError') {
         throw new CastErr('Удаления лайка с некорректным id для карточки');
       }
-
+    })
+    .catch((error) => {
       next(error);
     });
 };
