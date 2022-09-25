@@ -62,6 +62,16 @@ module.exports.getUsers = (req, res, next) => {
     .catch((error) => next(error));
 };
 
+module.exports.getMeInfoUser = (req, res, next) => {
+  const { _id } = req.user;
+
+  User.findById(_id)
+    .then((user) => {
+      res.send({ data: user });
+    })
+    .catch((error) => next(error));
+};
+
 module.exports.getUserById = (req, res, next) => {
   const id = req.params.userId;
 

@@ -1,12 +1,13 @@
 const router = require('express').Router();
 const { Joi, celebrate } = require('celebrate');
 const {
-  getUsers, getUserById, updateUserInfo, updateUserAvatar,
+  getUsers, getUserById, updateUserInfo, updateUserAvatar, getMeInfoUser,
 } = require('../controllers/users');
 
 const regular = /^(https?:\/\/)(www\.)?([a-z1-9-]{2,}\.)+[a-z]{2,}\/?[a-z0-9-._~:/?#[\]@!$&'()*+,;=]*/i;
 
 router.get('/', getUsers);
+router.get('/me', getMeInfoUser);
 
 router.get('/:userId', celebrate({
   params: Joi.object().keys({
