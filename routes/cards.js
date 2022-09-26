@@ -1,16 +1,23 @@
 const router = require('express').Router();
 const { Joi, celebrate } = require('celebrate');
+const validator = require('validator');
 const {
   getCards, createCard, deleteCard, likeCard, dislikeCard,
 } = require('../controllers/cards');
 
-const regular = /^(https?:\/\/)(www\.)?([a-z1-9-]{2,}\.)+[a-z]{2,}\/?[a-z0-9-._~:/?#[\]@!$&'()*+,;=]*/i;
+const method = (value) => {
+  const result = validator.isURL(value);
+  if (result) {
+    return value;
+  }
+  throw new Error('URL validation err');
+};
 
 router.get('/', getCards);
 router.post('/', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).required(),
-    link: Joi.string().uri().regex(regular).required(),
+    link: Joi.string().required().custom(method),
   }),
 }), createCard);
 
