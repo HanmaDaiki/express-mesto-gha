@@ -8,7 +8,7 @@ const validateUrl = (value) => {
     return value;
   }
 
-  throw new UrlValidatorErr('Ошибка валидации почты!');
+  throw new UrlValidatorErr('Ошибка валидации URL!');
 };
 
 module.exports = validateUrl;
